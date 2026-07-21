@@ -1,0 +1,13 @@
+{
+  "typeCheckingMode": "basic",
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportMissingTypeStubs": false,
+  "reportUnknownMemberType": "warning",
+  "reportUnknownParameterType": "warning",
+  "reportUnknownVariableType": "warning",
+  "reportUnusedImport": "warning",
+  "reportUnusedVariable": "warning",
+  "exclude": ["**/node_modules", "**/__pycache__", ".venv", "data"],
+  "pythonVersion": "3.11"
+}
