@@ -22,8 +22,31 @@ class Settings(BaseSettings):
     )
 
     # ── Trading environment ──────────────────────────────────────────
-    trading_environment: Literal["paper", "live"] = "paper"
-    """Must be 'paper' for simulation or 'live' for real MT5 execution."""
+    trading_environment: Literal["paper", "demo", "live"] = "paper"
+    """Use paper/demo for simulation or live for real execution."""
+
+    # ── Execution platform ───────────────────────────────────────────
+    execution_platform: Literal["paper", "mt5", "rest"] = "paper"
+    """Selects the execution adapter: paper, MT5, or a generic REST platform."""
+
+    platform_profile_name: str = "default"
+    """Name of the credential profile stored in the OS keyring."""
+
+    platform_api_base_url: str = ""
+    """Base URL for REST-capable trading platforms."""
+
+    platform_market_path: str = "/market/snapshot"
+    """Relative REST path used when requesting market snapshots."""
+
+    platform_order_path: str = "/orders"
+    """Relative REST path used when submitting orders."""
+
+    platform_account_path: str = "/account"
+    """Relative REST path used for account health checks."""
+
+    platform_api_key_field: str = "api_key"
+    platform_api_secret_field: str = "api_secret"
+    platform_access_pin_field: str = "access_pin"
 
     # ── MetaTrader 5 ─────────────────────────────────────────────────
     mt5_terminal_path: str = ""
@@ -117,7 +140,7 @@ class Settings(BaseSettings):
 
     @property
     def is_paper(self) -> bool:
-        return self.trading_environment == "paper"
+        return self.trading_environment in {"paper", "demo"}
 
     @property
     def risk_free_rate(self) -> float:

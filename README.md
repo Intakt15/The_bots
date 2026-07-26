@@ -2,7 +2,9 @@
 
 A production-ready, multi-agent trading system with **full MetaTrader 5 integration**. Five specialized AI agents collaborate through a consensus engine with a final-veto Risk Guardian. All decisions are audited via SQLite.
 
-> **Paper trading is the default.** Live MT5 requires `TRADING_ENVIRONMENT=live` and valid credentials (Windows + MT5 terminal running).
+> **Paper/demo trading is the default.** Live MT5 requires `TRADING_ENVIRONMENT=live` and valid credentials (Windows + MT5 terminal running).
+
+> **Desktop launch:** run `scripts/install_desktop_launcher.sh` once to create a double-clickable macOS launcher on your Desktop.
 
 ## Architecture
 
@@ -38,6 +40,7 @@ MT5 Terminal ---> Market Data Adapter (OHLCV + 14 indicators)
 | **MT5 Execution** | `adapters/mt5_execution.py` | Places real orders through MT5 with SL/TP, idempotency via decision_id dedup, connect/login/disconnect lifecycle |
 | **Paper Trading** | `adapters/paper_execution.py` | Simulates fills with configurable slippage (0.5 pips default), fill probability (98%), idempotency guard |
 | **Mock Data** | `adapters/mock_market_data.py` | Synthetic OHLCV + indicators for macOS/Linux development |
+| **REST Trading** | `adapters/rest_execution.py` | Generic HTTP execution gateway for platforms that expose AI-trading APIs and use keyring-stored API keys/pins |
 
 ## Components
 
@@ -107,9 +110,10 @@ tests/              17 tests
 
 ## Safety
 
-- **Paper mode default** -- never trades live unless explicitly configured
+- **Paper/demo mode default** -- never trades live unless explicitly configured
 - **Risk Guardian final veto** -- no agent, dashboard, or adapter can bypass it
 - **LearningAI advisory only** -- all recommendations require human review
 - **Idempotent execution** -- decision_id dedup prevents double orders
 - **Full audit trail** -- every signal, assessment, decision, execution, and outcome persisted
 - **MT5 optional** -- macOS/Linux development uses mock data + paper execution
+- **Credentials in OS keyring** -- API keys, secrets, and access pins can be stored per platform profile instead of plaintext files

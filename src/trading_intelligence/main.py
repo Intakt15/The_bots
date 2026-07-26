@@ -39,7 +39,22 @@ def setup_logging(settings: Settings) -> None:
 
 
 def create_market_provider(settings: Settings):
-    if settings.is_paper:
+    if settings.execution_platform == "rest":
+        from trading_intelligence.adapters.rest_market_data import RestMarketDataProvider
+
+        provider = RestMarketDataProvider(
+            base_url=settings.platform_api_base_url,
+            profile_name=settings.platform_profile_name,
+            market_path=settings.platform_market_path,
+            api_key_field=settings.platform_api_key_field,
+            api_secret_field=settings.platform_api_secret_field,
+            access_pin_field=settings.platform_access_pin_field,
+        )
+        if not provider.connect():
+            logger.error("Failed to connect to REST market data provider.")
+            sys.exit(1)
+        return provider
+    elif settings.is_paper:
         from trading_intelligence.adapters.mock_market_data import MockMarketDataProvider
         return MockMarketDataProvider()
     else:
@@ -52,6 +67,23 @@ def create_market_provider(settings: Settings):
 
 
 def create_execution_gateway(settings: Settings):
+    if settings.execution_platform == "rest":
+        from trading_intelligence.adapters.rest_execution import RestExecutionGateway
+
+        gateway = RestExecutionGateway(
+            base_url=settings.platform_api_base_url,
+            profile_name=settings.platform_profile_name,
+            order_path=settings.platform_order_path,
+            account_path=settings.platform_account_path,
+            api_key_field=settings.platform_api_key_field,
+            api_secret_field=settings.platform_api_secret_field,
+            access_pin_field=settings.platform_access_pin_field,
+        )
+        if not gateway.connect():
+            logger.error("Failed to connect to REST trading platform.")
+            sys.exit(1)
+        return gateway
+
     if settings.is_paper:
         from trading_intelligence.adapters.paper_execution import PaperExecutionGateway
         return PaperExecutionGateway()
@@ -92,6 +124,7 @@ def main() -> None:
     logger.info("=" * 60)
     logger.info("Multi-Agent MT5 Trading Intelligence")
     logger.info("Environment: %s", settings.trading_environment.upper())
+    logger.info("Execution platform: %s", settings.execution_platform.upper())
     logger.info("Instruments: %s", ", ".join(settings.instrument_whitelist))
     logger.info("Interval: %ds", settings.polling_interval_seconds)
     logger.info("=" * 60)
