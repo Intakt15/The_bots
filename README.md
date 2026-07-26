@@ -4,7 +4,7 @@ A production-ready, multi-agent trading system with **full MetaTrader 5 integrat
 
 > **Paper/demo trading is the default.** Live MT5 requires `TRADING_ENVIRONMENT=live` and valid credentials (Windows + MT5 terminal running).
 
-> **Desktop launch:** run `scripts/install_desktop_launcher.sh` once to create a double-clickable macOS launcher on your Desktop.
+> **Desktop launch:** run `scripts/install_desktop_launcher.sh` once to create a double-clickable macOS `.app` bundle on your Desktop.
 
 ## Architecture
 
@@ -117,3 +117,29 @@ tests/              17 tests
 - **Full audit trail** -- every signal, assessment, decision, execution, and outcome persisted
 - **MT5 optional** -- macOS/Linux development uses mock data + paper execution
 - **Credentials in OS keyring** -- API keys, secrets, and access pins can be stored per platform profile instead of plaintext files
+
+## Off-Chain Bot Scaffold
+
+```text
+src/trading_intelligence/offchain_bot/
+  config.py                  Environment-only runtime settings
+  models.py                  Quote, opportunity, risk, and execution dataclasses
+  strategy.py                Rolling-window trade opportunity scanner
+  risk.py                    Slippage protection and emergency kill switch
+  bot.py                     Orchestrates market data, risk, and execution
+  connectors/                CEX, Web3, and paper/demo adapters
+infra/main.bicep             Azure Container Apps + ACR + Key Vault
+.github/workflows/deploy.yml  OIDC-based CI/CD pipeline
+Dockerfile                   python:3.11-slim runtime image
+```
+
+The off-chain bot reads all sensitive values from environment variables only. In Azure, inject them from Key Vault into Container Apps rather than baking them into the image or workflow logs.
+
+### GitHub Actions / Azure deployment inputs
+
+Configure these repository secrets and variables before enabling the deploy workflow:
+
+- Secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
+- Variables: `ACR_NAME`, `AZURE_RESOURCE_GROUP`, `CONTAINER_APP_NAME`
+
+For local macOS launches, run `scripts/install_desktop_launcher.sh` to build the `.app` bundle on your Desktop.
