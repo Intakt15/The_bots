@@ -20,8 +20,12 @@ from decimal import Decimal
 from typing import Sequence
 
 from trading_intelligence.agents.learning_ai import LearningAI
+from trading_intelligence.agents.arbitrage_ai import ArbitrageAI
+from trading_intelligence.agents.compliance_ai import ComplianceAI
+from trading_intelligence.agents.liquidity_ai import LiquidityAI
 from trading_intelligence.agents.news_ai import NewsAI
 from trading_intelligence.agents.risk_ai import RiskManager
+from trading_intelligence.agents.sentiment_ai import SentimentAI
 from trading_intelligence.agents.session_ai import SessionAI
 from trading_intelligence.agents.signal_ai import SignalAI
 from trading_intelligence.application.pipeline import (
@@ -76,6 +80,10 @@ class TradingEngine:
         # Initialize agents
         self._signal_ai = SignalAI()
         self._news_ai = NewsAI()
+        self._sentiment_ai = SentimentAI()
+        self._liquidity_ai = LiquidityAI()
+        self._arbitrage_ai = ArbitrageAI()
+        self._compliance_ai = ComplianceAI()
         self._session_ai = SessionAI()
         self._risk_manager = RiskManager()
         self._learning_ai = LearningAI()
@@ -151,8 +159,19 @@ class TradingEngine:
         # 2. Run specialist agents
         signal = self._signal_ai.evaluate(snapshot)
         news_assessment = self._news_ai.evaluate(snapshot)
+        sentiment_assessment = self._sentiment_ai.evaluate(snapshot)
+        liquidity_assessment = self._liquidity_ai.evaluate(snapshot)
+        arbitrage_assessment = self._arbitrage_ai.evaluate(snapshot)
+        compliance_assessment = self._compliance_ai.evaluate(snapshot)
         session_assessment = self._session_ai.evaluate(snapshot)
-        assessments = [news_assessment, session_assessment]
+        assessments = [
+            news_assessment,
+            sentiment_assessment,
+            liquidity_assessment,
+            arbitrage_assessment,
+            compliance_assessment,
+            session_assessment,
+        ]
 
         # Log agent outputs
         logger.debug(
@@ -165,7 +184,7 @@ class TradingEngine:
 
         # 3. Run pipeline (consensus → risk → execution)
         decision, report = self._pipeline.process(
-            signal, assessments, self._account, at
+            signal, assessments, self._account, at, snapshot
         )
 
         # 4. Update risk tracker on execution

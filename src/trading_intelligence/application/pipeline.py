@@ -23,6 +23,7 @@ from trading_intelligence.domain import (
     AgentAssessment,
     DecisionStatus,
     ExecutionReport,
+    MarketSnapshot,
     RiskAssessment,
     Side,
     Signal,
@@ -65,7 +66,19 @@ class WeightedConsensus:
         self.signal_weight = Decimal(str(settings.signal_weight))
         self.session_weight = Decimal(str(settings.session_weight))
         self.news_weight = Decimal(str(settings.news_weight))
-        self._total_weight = self.signal_weight + self.session_weight + self.news_weight
+        self.sentiment_weight = Decimal(str(settings.sentiment_weight))
+        self.liquidity_weight = Decimal(str(settings.liquidity_weight))
+        self.arbitrage_weight = Decimal(str(settings.arbitrage_weight))
+        self.compliance_weight = Decimal(str(settings.compliance_weight))
+        self._total_weight = (
+            self.signal_weight
+            + self.session_weight
+            + self.news_weight
+            + self.sentiment_weight
+            + self.liquidity_weight
+            + self.arbitrage_weight
+            + self.compliance_weight
+        )
 
     def decide(
         self,
@@ -155,6 +168,10 @@ class WeightedConsensus:
             "session_ai": self.session_weight,
             "news_ai": self.news_weight,
             "signal_ai": self.signal_weight,
+            "sentiment_ai": self.sentiment_weight,
+            "liquidity_ai": self.liquidity_weight,
+            "arbitrage_ai": self.arbitrage_weight,
+            "compliance_ai": self.compliance_weight,
         }
 
         for agent_name, assessment in assessment_map.items():
@@ -291,7 +308,10 @@ class FixedRiskPolicy:
         self.quantity = quantity
 
     def assess(
-        self, decision: TradeDecision, account: AccountState
+        self,
+        decision: TradeDecision,
+        account: AccountState,
+        snapshot: MarketSnapshot | None = None,
     ) -> RiskAssessment:
         reasons: list[str] = []
         if account.daily_drawdown >= self.max_daily_drawdown:
@@ -333,6 +353,7 @@ class DecisionPipeline:
         assessments: Sequence[AgentAssessment],
         account: AccountState,
         at: datetime | None = None,
+        snapshot: MarketSnapshot | None = None,
     ) -> tuple[TradeDecision, ExecutionReport | None]:
         """Run the full decision lifecycle.
 
@@ -347,7 +368,7 @@ class DecisionPipeline:
         decision = self._consensus.decide(signal, assessments, at)
 
         # 2. Risk assessment (FINAL VETO)
-        risk = self._risk.assess(decision, account)
+        risk = self._risk.assess(decision, account, snapshot)
         if not risk.approved:
             decision = replace(
                 decision,

@@ -1,6 +1,33 @@
 from .models import (
-    AccountState, AgentAssessment, DecisionStatus, ExecutionReport, MarketSnapshot,
-    RiskAssessment, Side, Signal, TradeDecision, TradeOutcome,
+    AccountState,
+    AgentAssessment,
+    ArbitrageOpportunity,
+    ComplianceAssessment,
+    DecisionStatus,
+    ExecutionReport,
+    LiquidityAssessment,
+    MarketSnapshot,
+    RiskAssessment,
+    SentimentAssessment,
+    Side,
+    Signal,
+    TradeDecision,
+    TradeOutcome,
 )
 
-__all__ = ["AccountState", "AgentAssessment", "DecisionStatus", "ExecutionReport", "MarketSnapshot", "RiskAssessment", "Side", "Signal", "TradeDecision", "TradeOutcome"]
+__all__ = [
+    "AccountState",
+    "AgentAssessment",
+    "ArbitrageOpportunity",
+    "ComplianceAssessment",
+    "DecisionStatus",
+    "ExecutionReport",
+    "LiquidityAssessment",
+    "MarketSnapshot",
+    "RiskAssessment",
+    "SentimentAssessment",
+    "Side",
+    "Signal",
+    "TradeDecision",
+    "TradeOutcome",
+]

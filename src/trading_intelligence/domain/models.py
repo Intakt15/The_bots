@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from enum import StrEnum
 from typing import Mapping
@@ -53,6 +53,56 @@ class AgentAssessment:
     rationale: str
     generated_at: datetime
     metadata: Mapping[str, str] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class SentimentAssessment:
+    source: str
+    symbol: str
+    sentiment_score: Decimal
+    confidence: Decimal
+    flagged_risk: bool
+    rationale: str
+    generated_at: datetime
+    topics: tuple[str, ...] = field(default_factory=tuple)
+
+
+@dataclass(frozen=True, slots=True)
+class LiquidityAssessment:
+    source: str
+    symbol: str
+    depth_score: Decimal
+    imbalance_score: Decimal
+    confidence: Decimal
+    whale_activity: bool
+    rationale: str
+    generated_at: datetime
+    venues: tuple[str, ...] = field(default_factory=tuple)
+
+
+@dataclass(frozen=True, slots=True)
+class ArbitrageOpportunity:
+    source: str
+    symbol: str
+    venue_a: str
+    venue_b: str
+    spread_bps: Decimal
+    edge_score: Decimal
+    profitable: bool
+    rationale: str
+    generated_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class ComplianceAssessment:
+    source: str
+    symbol: str
+    allowed: bool
+    policy_version: str
+    violations: tuple[str, ...] = field(default_factory=tuple)
+    rate_limit_remaining: int | None = None
+    rationale: str = ""
+    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 @dataclass(frozen=True, slots=True)

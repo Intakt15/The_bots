@@ -6,8 +6,14 @@ from datetime import datetime
 from typing import Protocol, Sequence
 
 from trading_intelligence.domain import (
-    AccountState, AgentAssessment, ExecutionReport, MarketSnapshot, RiskAssessment,
-    Signal, TradeDecision, TradeOutcome,
+    AccountState,
+    AgentAssessment,
+    ExecutionReport,
+    MarketSnapshot,
+    RiskAssessment,
+    Signal,
+    TradeDecision,
+    TradeOutcome,
 )
 
 
@@ -34,7 +40,12 @@ class ConsensusEngine(Protocol):
 
 
 class RiskGuardian(Protocol):
-    def assess(self, decision: TradeDecision, account: AccountState) -> RiskAssessment: ...
+    def assess(
+        self,
+        decision: TradeDecision,
+        account: AccountState,
+        snapshot: MarketSnapshot | None = None,
+    ) -> RiskAssessment: ...
 
 
 class ExecutionGateway(Protocol):

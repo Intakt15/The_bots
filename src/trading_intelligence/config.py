@@ -86,6 +86,10 @@ class Settings(BaseSettings):
     signal_weight: float = 40.0
     session_weight: float = 30.0
     news_weight: float = 30.0
+    sentiment_weight: float = 25.0
+    liquidity_weight: float = 20.0
+    arbitrage_weight: float = 0.0
+    compliance_weight: float = 0.0
 
     # ── Consensus thresholds ─────────────────────────────────────────
     consensus_minimum_score: float = 70.0

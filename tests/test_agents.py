@@ -4,16 +4,24 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from trading_intelligence.agents.learning_ai import LearningAI, LearningRecommendation
+from trading_intelligence.agents.arbitrage_ai import ArbitrageAI
+from trading_intelligence.agents.compliance_ai import ComplianceAI
+from trading_intelligence.agents.liquidity_ai import LiquidityAI
 from trading_intelligence.agents.news_ai import NewsAI
 from trading_intelligence.agents.risk_ai import RiskManager
+from trading_intelligence.agents.sentiment_ai import SentimentAI
 from trading_intelligence.agents.session_ai import SessionAI
 from trading_intelligence.agents.signal_ai import SignalAI
 from trading_intelligence.domain import (
     AccountState,
     AgentAssessment,
+    ArbitrageOpportunity,
+    ComplianceAssessment,
     DecisionStatus,
+    LiquidityAssessment,
     MarketSnapshot,
     Side,
+    SentimentAssessment,
     TradeDecision,
     TradeOutcome,
 )
@@ -114,6 +122,47 @@ def test_news_ai_defaults_to_eligible_when_no_calendar():
     assert isinstance(result, AgentAssessment)
     assert result.eligible is True
     assert result.agent == "news_ai"
+
+
+def test_sentiment_ai_returns_structured_assessment():
+    ai = SentimentAI()
+    snapshot = make_snapshot(symbol="XAUUSD")
+    structured = ai.analyze(snapshot)
+    result = ai.evaluate(snapshot)
+    assert isinstance(structured, SentimentAssessment)
+    assert isinstance(result, AgentAssessment)
+    assert result.eligible is True
+
+
+def test_liquidity_ai_returns_structured_assessment():
+    ai = LiquidityAI()
+    snapshot = make_snapshot()
+    structured = ai.analyze(snapshot)
+    result = ai.evaluate(snapshot)
+    assert isinstance(structured, LiquidityAssessment)
+    assert isinstance(result, AgentAssessment)
+    assert result.eligible is True
+
+
+def test_arbitrage_ai_is_neutral_and_non_blocking():
+    ai = ArbitrageAI()
+    snapshot = make_snapshot()
+    structured = ai.analyze(snapshot)
+    result = ai.evaluate(snapshot)
+    assert isinstance(structured, ArbitrageOpportunity)
+    assert isinstance(result, AgentAssessment)
+    assert result.eligible is True
+    assert result.score >= Decimal("0")
+
+
+def test_compliance_ai_returns_structured_assessment():
+    ai = ComplianceAI()
+    snapshot = make_snapshot()
+    structured = ai.analyze(snapshot)
+    result = ai.evaluate(snapshot)
+    assert isinstance(structured, ComplianceAssessment)
+    assert isinstance(result, AgentAssessment)
+    assert result.eligible is True
 
 
 # ── SessionAI Tests ──────────────────────────────────────────────────
