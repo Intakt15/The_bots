@@ -142,4 +142,4 @@ Configure these repository secrets and variables before enabling the deploy work
 - Secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
 - Variables: `ACR_NAME`, `AZURE_RESOURCE_GROUP`, `CONTAINER_APP_NAME`
 
-For local macOS launches, run `scripts/install_desktop_launcher.sh` to build the `.app` bundle on your Desktop.
+For local macOS launches, run `scripts/install_desktop_launcher.sh` to build the `.app` bundle on your Desktop. The app launches the bot in the background and writes logs to `~/Library/Logs/Multi-Agent Trading Intelligence/launcher.log`.

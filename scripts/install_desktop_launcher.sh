@@ -9,18 +9,59 @@ macos_dir="$contents_dir/MacOS"
 resources_dir="$contents_dir/Resources"
 launcher_path="$macos_dir/$app_name"
 plist_path="$contents_dir/Info.plist"
+source_path="/tmp/multi-agent-trading-intelligence-launcher.swift"
+log_dir="$HOME/Library/Logs/Multi-Agent Trading Intelligence"
+log_file="$log_dir/launcher.log"
 
 rm -rf "$app_root"
-mkdir -p "$macos_dir" "$resources_dir"
+mkdir -p "$macos_dir" "$resources_dir" "$log_dir"
+rm -f "$source_path"
 
-cat > "$launcher_path" <<EOF
-#!/bin/zsh
-set -euo pipefail
-cd "$repo_root"
-exec /usr/bin/env python3 -m trading_intelligence.main "\$@"
+cat > "$source_path" <<EOF
+import AppKit
+import Foundation
+
+final class LauncherDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        let repoRoot = "$repo_root"
+        let logDir = "$log_dir"
+        let logFile = "$log_file"
+        let fileManager = FileManager.default
+        try? fileManager.createDirectory(atPath: logDir, withIntermediateDirectories: true)
+
+        let shell = Process()
+        shell.executableURL = URL(fileURLWithPath: "/bin/zsh")
+        shell.arguments = [
+            "-lc",
+            "cd \"\(repoRoot)\" && nohup /usr/bin/env python3 -m trading_intelligence.main >> \"\(logFile)\" 2>&1 &"
+        ]
+
+        do {
+            try shell.run()
+            shell.waitUntilExit()
+        } catch {
+            let message = "Failed to launch trading bot: \(error)\n"
+            try? message.write(toFile: logFile, atomically: true, encoding: .utf8)
+        }
+
+        NSApp.terminate(nil)
+    }
+}
+
+@main
+struct LauncherMain {
+    static func main() {
+        let app = NSApplication.shared
+        let delegate = LauncherDelegate()
+        app.delegate = delegate
+        app.setActivationPolicy(.prohibited)
+        app.run()
+    }
+}
 EOF
 
-chmod +x "$launcher_path"
+swiftc -parse-as-library -framework AppKit "$source_path" -o "$launcher_path"
+rm -f "$source_path"
 
 cat > "$plist_path" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
